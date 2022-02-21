@@ -151,7 +151,7 @@ export interface YoutubeIframeProps {
   /**
    * url that fetches a webpage compatible with youtube iframe interface
    *
-   * * defaults to : https://lonelycpp.github.io/react-native-youtube-iframe/iframe.html
+   * * defaults to : https://hyochan.github.io/youtube_iframe/
    * * for code check "iframe.html" in package repo
    */
   baseUrlOverride?: string;
