@@ -10,7 +10,7 @@ import {
   playMode,
   soundMode,
 } from './PlayerScripts';
-import {Platform, StyleSheet, View} from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import React, {
   forwardRef,
   useCallback,
@@ -21,9 +21,9 @@ import React, {
   useState,
 } from 'react';
 
-import {EventEmitter} from 'events';
-import {WebView} from './WebView';
-import {deepComparePlayList} from './utils';
+import { EventEmitter } from 'events';
+import { WebView } from './WebView';
+import { deepComparePlayList } from './utils';
 
 const YoutubeIframe = (props, ref) => {
   const {
@@ -40,18 +40,18 @@ const YoutubeIframe = (props, ref) => {
     baseUrlOverride,
     playbackRate = 1,
     contentScale = 1.0,
-    onError = _err => {},
-    onReady = _event => {},
+    onError = _err => { },
+    onReady = _event => { },
     playListStartIndex = 0,
     initialPlayerParams,
     allowWebViewZoom = false,
     forceAndroidAutoplay = false,
-    onChangeState = _event => {},
-    onFullScreenChange = _status => {},
-    onPlaybackQualityChange = _quality => {},
-    onPlaybackRateChange = _playbackRate => {},
+    onChangeState = _event => { },
+    onFullScreenChange = _status => { },
+    onPlaybackQualityChange = _quality => { },
+    onPlaybackRateChange = _playbackRate => { },
   } = props;
-
+  const mounted = useRef(false);
   const [playerReady, setPlayerReady] = useState(false);
   const lastVideoIdRef = useRef(videoId);
   const lastPlayListRef = useRef(playList);
@@ -176,6 +176,14 @@ const YoutubeIframe = (props, ref) => {
     );
   }, [playList, play, playListStartIndex, playerReady]);
 
+  useEffect(() => {
+    mounted.current = true;
+
+    return () => {
+      mounted.current = false;
+    }
+  }, []);
+
   const onWebMessage = useCallback(
     event => {
       try {
@@ -188,10 +196,14 @@ const YoutubeIframe = (props, ref) => {
           case 'playerStateChange':
             onChangeState(PLAYER_STATES[message.data]);
             break;
-          case 'playerReady':
+          case 'playerReady': {
             onReady();
+
+            if (!mounted.current) break;
+
             setPlayerReady(true);
             break;
+          }
           case 'playerQualityChange':
             onPlaybackQualityChange(message.data);
             break;
@@ -246,7 +258,7 @@ const YoutubeIframe = (props, ref) => {
     );
 
     if (useLocalHTML) {
-      const res = {html: ytScript.htmlString};
+      const res = { html: ytScript.htmlString };
       if (baseUrlOverride) {
         res.baseUrl = baseUrlOverride;
       }
@@ -256,11 +268,11 @@ const YoutubeIframe = (props, ref) => {
     const base = baseUrlOverride || DEFAULT_BASE_URL;
     const data = ytScript.urlEncodedJSON;
 
-    return {uri: base + '?data=' + data};
+    return { uri: base + '?data=' + data };
   }, [useLocalHTML, contentScale, baseUrlOverride, allowWebViewZoom]);
 
   return (
-    <View style={{height, width}}>
+    <View style={{ height, width }}>
       <WebView
         bounces={false}
         originWhitelist={['*']}
@@ -273,7 +285,7 @@ const YoutubeIframe = (props, ref) => {
         }
         userAgent={
           forceAndroidAutoplay
-            ? Platform.select({android: CUSTOM_USER_AGENT, ios: ''})
+            ? Platform.select({ android: CUSTOM_USER_AGENT, ios: '' })
             : ''
         }
         // props above this are override-able
@@ -292,7 +304,7 @@ const YoutubeIframe = (props, ref) => {
 };
 
 const styles = StyleSheet.create({
-  webView: {backgroundColor: 'transparent'},
+  webView: { backgroundColor: 'transparent' },
 });
 
 export default forwardRef(YoutubeIframe);
